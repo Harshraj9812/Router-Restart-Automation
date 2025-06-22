@@ -1,4 +1,4 @@
-# Router Scheduled Restart Automation
+# Router Restart Automation
 
 This script automates router restarts on a specified schedule using Selenium WebDriver.
 
