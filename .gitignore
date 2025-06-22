@@ -1,0 +1,7 @@
+*.zip
+*.deb
+*.env
+chrome-*
+*.png
+venv
+*.log
