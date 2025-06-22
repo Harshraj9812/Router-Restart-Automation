@@ -1,6 +1,6 @@
 # Router Scheduled Restart Automation
 
-This script automates restart router in specified schedule using Selenium WebDriver.
+This script automates router restarts on a specified schedule using Selenium WebDriver.
 
 ## Prerequisites
 
@@ -14,19 +14,11 @@ sudo apt update
 sudo apt install -y python3 python3-pip unzip wget curl xvfb
 ```
 
-### Create Virtual Enviroment for Python (OPTIONAL)
+### Create Virtual Environment for Python (OPTIONAL)
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirement.txt
-```
-
-### Python Dependencies
-
-```bash
-# Install Python packages
-pip3 install selenium
-pip install python-dotenv
+pip install -r scripts/requirement.txt
 ```
 
 ### Chrome Browser and ChromeDriver
@@ -45,29 +37,28 @@ sudo chmod +x /usr/local/bin/chrome
 
 ## Environment Setup
 
-1. Create a `.env` file in the project root directory:
+1. Create a `.env` file in the `scripts/` directory:
 
 ```bash
-touch .env
+touch scripts/.env
 ```
 
-2. Add your Naukri.com credentials to the `.env` file:
+2. Add your router credentials and Discord webhook to the `.env` file:
 
 ```plaintext
-AIRTEL_ROUTER_USERNAME=your.email@example.com
-AIRTEL_ROUTER_PASSWORD=your_password
+AIRTEL_ROUTER_USERNAME=your_router_username
+AIRTEL_ROUTER_PASSWORD=your_router_password
+TPLINK_ROUTER_PASSWORD=your_tplink_password
+DISCORD_WEBHOOK_URL=your_discord_webhook_url
 ```
 
-⚠️ **Important**: Never commit your `.env` file to version control. Add it to `.gitignore`:
-
-```bash
-echo ".env" >> .gitignore
-```
+⚠️ **Important**: Never commit your `.env` file to version control. It is already included in `.gitignore`.
 
 ## Running the Script
 
 ```bash
-python3 <SCRIPT_NAME>.py
+python3 scripts/Airtel-Router-reboot.py
+python3 scripts/TpLink-Router-reboot.py
 ```
 
 ## Automatically Running as Cronjob
