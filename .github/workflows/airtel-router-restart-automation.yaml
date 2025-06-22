@@ -1,0 +1,86 @@
+name: Airtel Router Restart Automation
+
+on:
+  #schedule:
+    # Runs daily at 01:30AM UTC → 05:00AM IST
+    #- cron: '30 1 * * *'
+  workflow_dispatch:
+    inputs:
+      upload_screenshots:
+        description: 'Upload .png screenshots'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  Run-Automation:
+    runs-on: home-server-runner
+    # Make sure sudo is available
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up environment variables
+        env:
+          AIRTEL_ROUTER_USERNAME: ${{ secrets.AIRTEL_ROUTER_USERNAME }}
+          AIRTEL_ROUTER_PASSWORD: ${{ secrets.AIRTEL_ROUTER_PASSWORD }}
+        run: |
+          echo "AIRTEL_ROUTER_USERNAME is set: ${AIRTEL_ROUTER_USERNAME:+yes}"
+          echo "AIRTEL_ROUTER_PASSWORD is set: ${AIRTEL_ROUTER_PASSWORD:+yes}"
+      - name: Send Start Notification to Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d '{
+            "username": "Airtel Router Automation Bot",
+            "avatar_url": "https://img.freepik.com/premium-vector/logo-restart-is-black-background_663497-2073.jpg",
+            "content": "> 🔄 Starting Airtel Router Restart Automation Script"
+          }' ${{ secrets.ROUTER_DISCORD_WEBHOOK_URL }}
+
+      - name: Run Selenium script
+        id: run-selenium-script
+        env:
+          AIRTEL_ROUTER_USERNAME: ${{ secrets.AIRTEL_ROUTER_USERNAME }}
+          AIRTEL_ROUTER_PASSWORD: ${{ secrets.AIRTEL_ROUTER_PASSWORD }}
+        run: |
+          set -e
+          cd ./Router-Automation-Script/
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip3 install selenium python-dotenv
+          
+          echo "### Initial Directory Listing" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -l >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+          python3 Airtel-Router-reboot.py
+          
+          echo "### Final Directory Listing" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -l >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+     
+      - name: Send Success/Failure Notification to Discord
+        if: always()
+        run: |
+          if [ "${{ steps.run-selenium-script.outcome }}" == "success" ]; then
+            MESSAGE="> 🟢 Successfully Restarting Airtel Router with Automation Script"
+          else
+            MESSAGE="> 🚨 Error Restarting Airtel Router with Automation Script"
+          fi
+          
+          curl -H "Content-Type: application/json" \
+          -d '{
+            "username": "Airtel Router Automation Bot",
+            "avatar_url": "https://img.freepik.com/premium-vector/logo-restart-is-black-background_663497-2073.jpg",
+            "content": "'"$MESSAGE"'"
+          }' ${{ secrets.ROUTER_DISCORD_WEBHOOK_URL }}
+
+      - name: Upload screenshots if failed or requested manually
+        if: always() && (failure() || github.event.inputs.upload_screenshots == 'true')
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-web-page-screenshots
+          path: "./Router-Automation-Script/*.png"
+          retention-days: 2
