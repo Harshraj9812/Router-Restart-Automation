@@ -90,7 +90,7 @@ try:
     login_button.click()
 
     driver.save_screenshot("Airtel-2-after_login.png")
-    time.sleep(3)  # Wait for login to process
+    time.sleep(5)  # Wait for login to process
 except Exception as e:
     print(f"Error during login: {e}")
     send_discord_notification(f"⚠️ Error during login: {e}",16711680)
@@ -106,7 +106,7 @@ try:
     mgmt_link.click()
     
     driver.save_screenshot("Airtel-3-management_page.png")
-    time.sleep(3)  # Wait for page to load
+    time.sleep(5)  # Wait for page to load
 except Exception as e:
     print(f"Error clicking Management & Diagnosis link: {e}")
     send_discord_notification(f"⚠️ Error clicking Management & Diagnosis link: {e}",16711680)
@@ -122,7 +122,7 @@ try:
     sys_mgmt_link.click()
     
     driver.save_screenshot("Airtel-4-system_management_page.png")
-    time.sleep(3)  # Wait for page to load
+    time.sleep(5)  # Wait for page to load
 except Exception as e:
     print(f"Error clicking System Management link: {e}")
     send_discord_notification(f"⚠️ Error clicking System Management link: {e}",16711680)
@@ -138,7 +138,7 @@ try:
     reboot_button.click()
     
     driver.save_screenshot("Airtel-5-reboot_confirmation.png")
-    time.sleep(3)  # Wait for confirmation dialog
+    time.sleep(5)  # Wait for confirmation dialog
 
     # Click the OK button in the confirmation dialog
     confirm_button = WebDriverWait(driver, 10).until(
@@ -147,7 +147,7 @@ try:
     confirm_button.click()
     
     driver.save_screenshot("Airtel-6-reboot_initiated.png")
-    time.sleep(3)  # Wait for reboot initiation
+    time.sleep(5)  # Wait for reboot initiation
 except Exception as e:
     print(f"Error during reboot confirmation: {e}")
     send_discord_notification(f"⚠️ Error during reboot confirmation: {e}",16711680)
