@@ -16,6 +16,15 @@ load_dotenv()
 # Add Discord webhook configuration
 DISCORD_WEBHOOK_URL = os.getenv('DISCORD_WEBHOOK_URL')
 
+def check_ping(host="10.1.1.2"):
+    """
+    Returns True if host responds to a ping request, False otherwise.
+    """
+    # Option for the number of packets as a function of
+    param = '-n' if platform.system().lower()=='windows' else '-c'
+    command = ['ping', param, '1', host]
+    return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+
 def send_discord_notification(message, embeds_color):
     """Send notification to Discord channel"""
     try:
@@ -36,6 +45,14 @@ def send_discord_notification(message, embeds_color):
         response.raise_for_status()
     except Exception as e:
         print(f"Error sending Discord notification: {e}")
+
+# Check if router is pingable before proceeding
+if not check_ping():
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    message = f"❌ Router ping failed at {current_time}. Tplink Router is not accessible at 10.1.1.2"
+    send_discord_notification(message, 16711680)  # Red color for error
+    print(message)
+    exit(1)
 
 # Send notification before starting the reboot process
 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -62,7 +79,7 @@ driver = webdriver.Chrome(options=options)
 # Navigate to the site
 try:
     driver.get("http://10.1.1.2/")
-    time.sleep(3)
+    time.sleep(5)
     driver.save_screenshot("TpLink-1-login_page_opened.png")
 except Exception as e:
     print(f"Error opening Router Admin page: {e}")
@@ -98,7 +115,7 @@ try:
     )
     login_button.click()
     driver.save_screenshot("TpLink-2-logged_in_successfully.png")
-    time.sleep(3)  # Wait for login to complete
+    time.sleep(5)  # Wait for login to complete
 
 except Exception as e:
     print(f"Error during login: {e}")
@@ -115,7 +132,7 @@ try:
     )
     restart_button.click()
     driver.save_screenshot("TpLink-3-restart_button_clicked.png")
-    time.sleep(3)  # Wait for confirmation dialog to appear
+    time.sleep(5)  # Wait for confirmation dialog to appear
 except Exception as e:
     print(f"Error clicking Restart button: {e}")
     send_discord_notification(f"⚠️ Error clicking Restart button: {e}",16711680)
@@ -131,7 +148,7 @@ try:
     )
     confirm_button.click()
     driver.save_screenshot("TpLink-4-reboot_initiated.png")
-    time.sleep(3)  # Wait for reboot initiation
+    time.sleep(5)  # Wait for reboot initiation
 except Exception as e:
     print(f"Error during reboot confirmation: {e}")
     send_discord_notification(f"⚠️ Error during reboot confirmation: {e}",16711680)

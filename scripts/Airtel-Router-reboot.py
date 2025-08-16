@@ -16,6 +16,15 @@ load_dotenv()
 # Add Discord webhook configuration
 DISCORD_WEBHOOK_URL = os.getenv('DISCORD_WEBHOOK_URL')
 
+def check_ping(host="10.1.1.1"):
+    """
+    Returns True if host responds to a ping request, False otherwise.
+    """
+    # Option for the number of packets as a function of
+    param = '-n' if platform.system().lower()=='windows' else '-c'
+    command = ['ping', param, '1', host]
+    return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+
 def send_discord_notification(message, embeds_color):
     """Send notification to Discord channel"""
     try:
@@ -37,9 +46,17 @@ def send_discord_notification(message, embeds_color):
     except Exception as e:
         print(f"Error sending Discord notification: {e}")
 
+# Check if router is pingable before proceeding
+if not check_ping():
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    message = f"❌ Router ping failed at {current_time}. Airtel Router is not accessible at 10.1.1.1"
+    send_discord_notification(message, 16711680)  # Red color for error
+    print(message)
+    exit(1)
+
 # Send notification before starting the reboot process
 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-send_discord_notification(f"🔄 Router reboot initiated at {current_time}",255)
+send_discord_notification(f"🔄 Router reboot initiated at {current_time}", 255)
 print(f"🔄 Router reboot initiated at {current_time}")
 
 
@@ -90,7 +107,7 @@ try:
     login_button.click()
 
     driver.save_screenshot("Airtel-2-after_login.png")
-    time.sleep(3)  # Wait for login to process
+    time.sleep(5)  # Wait for login to process
 except Exception as e:
     print(f"Error during login: {e}")
     send_discord_notification(f"⚠️ Error during login: {e}",16711680)
@@ -106,7 +123,7 @@ try:
     mgmt_link.click()
     
     driver.save_screenshot("Airtel-3-management_page.png")
-    time.sleep(3)  # Wait for page to load
+    time.sleep(5)  # Wait for page to load
 except Exception as e:
     print(f"Error clicking Management & Diagnosis link: {e}")
     send_discord_notification(f"⚠️ Error clicking Management & Diagnosis link: {e}",16711680)
@@ -122,7 +139,7 @@ try:
     sys_mgmt_link.click()
     
     driver.save_screenshot("Airtel-4-system_management_page.png")
-    time.sleep(3)  # Wait for page to load
+    time.sleep(5)  # Wait for page to load
 except Exception as e:
     print(f"Error clicking System Management link: {e}")
     send_discord_notification(f"⚠️ Error clicking System Management link: {e}",16711680)
@@ -138,7 +155,7 @@ try:
     reboot_button.click()
     
     driver.save_screenshot("Airtel-5-reboot_confirmation.png")
-    time.sleep(3)  # Wait for confirmation dialog
+    time.sleep(5)  # Wait for confirmation dialog
 
     # Click the OK button in the confirmation dialog
     confirm_button = WebDriverWait(driver, 10).until(
@@ -147,7 +164,7 @@ try:
     confirm_button.click()
     
     driver.save_screenshot("Airtel-6-reboot_initiated.png")
-    time.sleep(3)  # Wait for reboot initiation
+    time.sleep(5)  # Wait for reboot initiation
 except Exception as e:
     print(f"Error during reboot confirmation: {e}")
     send_discord_notification(f"⚠️ Error during reboot confirmation: {e}",16711680)
