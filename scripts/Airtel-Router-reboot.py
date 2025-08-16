@@ -16,6 +16,15 @@ load_dotenv()
 # Add Discord webhook configuration
 DISCORD_WEBHOOK_URL = os.getenv('DISCORD_WEBHOOK_URL')
 
+def check_ping(host="10.1.1.1"):
+    """
+    Returns True if host responds to a ping request, False otherwise.
+    """
+    # Option for the number of packets as a function of
+    param = '-n' if platform.system().lower()=='windows' else '-c'
+    command = ['ping', param, '1', host]
+    return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+
 def send_discord_notification(message, embeds_color):
     """Send notification to Discord channel"""
     try:
@@ -37,9 +46,17 @@ def send_discord_notification(message, embeds_color):
     except Exception as e:
         print(f"Error sending Discord notification: {e}")
 
+# Check if router is pingable before proceeding
+if not check_ping():
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    message = f"❌ Router ping failed at {current_time}. Airtel Router is not accessible at 10.1.1.1"
+    send_discord_notification(message, 16711680)  # Red color for error
+    print(message)
+    exit(1)
+
 # Send notification before starting the reboot process
 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-send_discord_notification(f"🔄 Router reboot initiated at {current_time}",255)
+send_discord_notification(f"🔄 Router reboot initiated at {current_time}", 255)
 print(f"🔄 Router reboot initiated at {current_time}")
 
 
